@@ -1,0 +1,5 @@
+﻿label,status,trend,footer
+Financial,Red,Down,Below Last Quarter
+People,Red,Down,Below Last Quarter
+Operations,Amber,Up,Above Last Quarter
+Customer,Green,Stable,Same as Last Quarter
