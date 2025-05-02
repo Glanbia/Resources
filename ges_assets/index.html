@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2x2 Dashboard</title>
+  <style>
+    :root {
+      --color-red: #CB4F33;
+      --color-amber: #E18F33;
+      --color-green: #75C1AE;
+    }
+
+    html, body {
+      background-color: white;
+      margin: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: block;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 880px;
+      margin: 40px auto;
+    }
+
+    .logo-placeholder {
+      width: 200px;
+      height: 50px;
+      background-image: url('ges_logo.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: left center;
+      margin-right: 30px;
+      margin-left: 40px;
+    }
+
+    .dashboard-title {
+      font-size: 30px;
+      color: black;
+      font-weight: bold;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: auto 240px 240px auto;
+      grid-template-rows: auto 240px 240px auto;
+      gap: 50px;
+      align-items: center;
+      justify-items: center;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .square {
+      width: 240px;
+      height: 240px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 30px;
+      font-weight: bold;
+      text-align: center;
+      color: white;
+      position: relative;
+    }
+
+    .square-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+      width: 100%;
+    }
+
+    .trend-icon {
+      margin-top: 8px;
+      height: 30px;
+    }
+
+    .square-footer {
+      width: 100%;
+      font-size: 12px;
+      font-style: italic;
+      font-weight: normal;
+      text-align: center;
+      padding: 4px 0;
+      border-top: 1px solid white;
+      color: white;
+      background-color: inherit;
+    }
+
+    .red {
+      background-color: var(--color-red);
+    }
+
+    .amber {
+      background-color: var(--color-amber);
+    }
+
+    .green {
+      background-color: var(--color-green);
+    }
+
+    .label {
+      font-style: italic;
+      color: black;
+      background-color: white;
+      text-align: right;
+      line-height: 1.4;
+    }
+    .label-right {
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-placeholder"></div>
+    <div class="dashboard-title">Balanced Scorecard Dashboard Q1 2025</div>
+  </div>
+
+  <div class="grid-container" id="dashboard">
+    <!-- Dynamic content will be injected here -->
+  </div>
+
+  <script>
+    const dataUrl = 'https://raw.githubusercontent.com/Glanbia/Resources/main/ges_assets/ops_data.csv';
+
+    const quadrantOrder = ['Financial', 'People', 'Operations', 'Customer'];
+
+    function colorClass(status) {
+      return {
+        Red: 'red',
+        Amber: 'amber',
+        Green: 'green'
+      }[status] || '';
+    }
+
+    function trendIcon(type) {
+      return {
+        Up: 'up_arrow.png',
+        Down: 'down_arrow.png',
+        Stable: 'stable_arrow.png'
+      }[type] || '';
+    }
+
+    function createSquare({ label, status, trend, footer }) {
+      const square = document.createElement('div');
+      square.className = `square ${colorClass(status)}`;
+      square.innerHTML = `
+        <div class="square-content">
+          ${label}
+          <img src="${trendIcon(trend)}" alt="${trend} arrow" class="trend-icon" />
+        </div>
+        <div class="square-footer">${footer}</div>
+      `;
+      return square;
+    }
+
+    function createLabel(text, align = 'left') {
+      const div = document.createElement('div');
+      div.className = 'label' + (align === 'right' ? ' label-right' : '');
+      div.innerHTML = text;
+      return div;
+    }
+
+    fetch(dataUrl)
+      .then(res => res.text())
+      .then(text => {
+        const rows = text.trim().split('\n');
+        const headers = rows[0].split(',');
+        const data = rows.slice(1).map(row => Object.fromEntries(
+          row.split(',').map((val, i) => [headers[i].trim(), val.trim()])
+        ));
+
+        const dashboard = document.getElementById('dashboard');
+
+        // Row 1
+        dashboard.appendChild(createLabel('Budget vs. Actuals<br>Recovery Targets'));
+        dashboard.appendChild(createSquare(data.find(d => d.label === 'Financial')));
+        dashboard.appendChild(createSquare(data.find(d => d.label === 'People')));
+        dashboard.appendChild(createLabel('Employee Engagement Score<br>Development & Growth', 'right'));
+
+        // Row 2
+        dashboard.appendChild(createLabel('Aged Tickets<br>Aged CRs'));
+        dashboard.appendChild(createSquare(data.find(d => d.label === 'Operations')));
+        dashboard.appendChild(createSquare(data.find(d => d.label === 'Customer')));
+        dashboard.appendChild(createLabel('Service Desk CSAT Survey<br>Service Delivery NPS', 'right'));
+      });
+  </script>
+</body>
+</html>
